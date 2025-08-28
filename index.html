@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cricket Score Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #006400;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin: 0;
+    }
+    .container {
+      padding: 20px;
+    }
+    .match {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .match h2 {
+      margin: 0;
+      font-size: 20px;
+      color: #006400;
+    }
+    .status {
+      font-style: italic;
+      color: #444;
+    }
+    .score {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🏏 Welcome to My Cricket Score Page</h1>
+  </header>
+
+  <div class="container" id="scores">
+    <p>Loading live scores...</p>
+  </div>
+
+  <script>
+    async function getScores() {
+      try {
+        // Use your API key
+        let response = await fetch("https://api.cricapi.com/v1/currentMatches?apikey=2cf63e9c-6946-4abb-89b4-3278d6fc70d4&offset=0");
+        let data = await response.json();
+
+        let scoresDiv = document.getElementById("scores");
+        scoresDiv.innerHTML = ""; // clear old content
+
+        if (!data.data || data.data.length === 0) {
+          scoresDiv.innerHTML = "<p>No live matches right now.</p>";
+          return;
+        }
+
+        data.data.forEach(match => {
+          let div = document.createElement("div");
+          div.classList.add("match");
+
+          div.innerHTML = `
+            <h2>${match.name}</h2>
+            <p class="status">Status: ${match.status}</p>
+            ${
+              match.score && match.score.length > 0
+              ? `<p class="score">Score: ${match.score[0].r}/${match.score[0].w} in ${match.score[0].o} overs</p>`
+              : `<p>No score available yet</p>`
+            }
+          `;
+
+          scoresDiv.appendChild(div);
+        });
+
+      } catch (error) {
+        console.error(error);
+        document.getElementById("scores").innerHTML = "<p>Error loading scores.</p>";
+      }
+    }
+
+    // Call once at start
+    getScores();
+
+    // Refresh every 30 seconds
+    setInterval(getScores, 30000);
+  </script>
+</body>
+</html>
